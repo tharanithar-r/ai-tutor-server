@@ -4,10 +4,10 @@ import { Server } from "socket.io";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import { Pool } from "pg";
-import dotenv from 'dotenv';
-import authPkg from './middleware/auth.js';
+import dotenv from "dotenv";
+import authPkg from "./middleware/auth.js";
 const { socketAuthMiddleware, httpAuthMiddleware, generateToken } = authPkg;
-import chatPkg from './routes/chat.js';
+import chatPkg from "./routes/chat.js";
 const { setupChatHandlers } = chatPkg;
 
 dotenv.config();
@@ -16,27 +16,21 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-      "https://*.vercel.app",
-      "https://vercel.app"
-    ],
+    origin: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"],
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   },
 });
 const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: [
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    "https://*.vercel.app",
-    "https://vercel.app"
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"],
+    credentials: true,
+  })
+);
 
 // Database connection
 const pool = new Pool({
@@ -50,19 +44,19 @@ const pool = new Pool({
 // Test database connection
 pool.connect((err, client, release) => {
   if (err) {
-    console.error('Error acquiring client', err.stack);
+    console.error("Error acquiring client", err.stack);
   } else {
-    console.log('Database connected successfully');
+    console.log("Database connected successfully");
     release();
   }
 });
 
 // Health check endpoint
 app.get("/", (req, res) => {
-  res.json({ 
+  res.json({
     message: "AI Tutor Backend Server with Socket.io",
     status: "healthy",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -162,5 +156,7 @@ setupChatHandlers(io, pool);
 server.listen(port, () => {
   console.log(`🚀 AI Tutor Server running on port ${port}`);
   console.log(`📡 Socket.io ready for connections`);
-  console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
+  console.log(
+    `🗄️  Database: ${process.env.DATABASE_URL ? "Connected" : "Not configured"}`
+  );
 });
